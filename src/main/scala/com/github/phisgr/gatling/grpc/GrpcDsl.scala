@@ -29,7 +29,7 @@ trait GrpcDsl {
    *
    * @param channelAttributeName The key in the session for storing the channel.
    *                             Start it with `"gatling."` to stop it from being removed during session reset.
-   * @return a [[DynamicGrpcProtocol]]
+   * @return a DynamicGrpcProtocol instance
    */
   def dynamicChannel(channelAttributeName: String): DynamicGrpcProtocol = DynamicGrpcProtocol(channelAttributeName)
 
@@ -54,7 +54,7 @@ trait GrpcDsl {
   }
 
   /**
-   * Passed to [[com.github.phisgr.gatling.grpc.request.ListeningStream.reconciliate]]
+   * Passed to [[com.github.phisgr.gatling.grpc.request.ListeningStream#reconciliate(WaitType,Boolean)]]
    * or [[com.github.phisgr.gatling.grpc.request.BidiStream.complete]].
    * Suspends the execution of the virtual user until
    * the stream ends.

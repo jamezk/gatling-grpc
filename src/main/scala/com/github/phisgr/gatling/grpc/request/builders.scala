@@ -42,7 +42,7 @@ sealed abstract class ListeningStream[Status >: Completed, C <: StreamCall[_, _,
   def cancelStream = new StreamCancelBuilder(requestName, streamName, direction)
 
   /**
-   * Combines the streaming state and the main flow using [[StreamStartBuilder.sessionCombiner]].
+   * Combines the streaming state and the main flow.
    * If the stream has already ended, the streaming call will be removed from the session.
    *
    * @param waitFor Defaults to [[NoWait]]. Can wait for [[NextMessage]] or [[StreamEnd]] before combining.

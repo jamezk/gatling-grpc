@@ -4,7 +4,7 @@ import io.grpc.{ClientCall, Metadata}
 
 object ClientCalls {
   /**
-   * Adapted from [[io.grpc.stub.ClientCalls.asyncUnaryRequestCall]]
+   * Based on io.grpc.stub.ClientCalls.asyncUnaryRequestCall
    */
   def asyncUnaryRequestCall[ReqT, RespT](
     call: ClientCall[ReqT, RespT],
