@@ -24,11 +24,11 @@ trait GrpcDsl {
   /**
    * Creates a GrpcProtocol that looks up a channel created at runtime.
    * The virtual user has to go through
-   * `exec(`[[com.github.phisgr.gatling.grpc.protocol.DynamicGrpcProtocol.setChannel]]`)`
+   * `exec(dynamicChannel.setChannel)` 
    * before running a gRPC action with `.target(dynamicChannel)`
    *
    * @param channelAttributeName The key in the session for storing the channel.
-   *                             Start it with `"gatling."` to stop it from being removed by [[Session.reset]].
+   *                             Start it with `"gatling."` to stop it from being removed during session reset.
    * @return a [[DynamicGrpcProtocol]]
    */
   def dynamicChannel(channelAttributeName: String): DynamicGrpcProtocol = DynamicGrpcProtocol(channelAttributeName)
@@ -39,8 +39,8 @@ trait GrpcDsl {
 
   /**
    * `$("name")` is a simpler alternative to the
-   * [[https://gatling.io/docs/gatling/reference/current/core/session/el/ EL string]] `"#{name}"`.
-   * Unlike the EL string, this [[Expression]] does not do type casting (e.g. parsing a String to an Int).
+   * EL string `"#{name}"` (see https://gatling.io/docs/gatling/reference/current/core/session/el/).
+   * Unlike the EL string, this Expression does not do type casting (e.g. parsing a String to an Int).
    *
    * @param name name of the session attribute
    * @tparam T expected type of the session attribute. Usually inferred by the compiler
