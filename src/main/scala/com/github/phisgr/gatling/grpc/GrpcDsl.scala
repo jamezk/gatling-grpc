@@ -54,7 +54,7 @@ trait GrpcDsl {
   }
 
   /**
-   * Passed to [[com.github.phisgr.gatling.grpc.request.ListeningStream#reconciliate(WaitType,Boolean)]]
+   * Passed to [[com.github.phisgr.gatling.grpc.request.ListeningStream.reconciliate]]
    * or [[com.github.phisgr.gatling.grpc.request.BidiStream.complete]].
    * Suspends the execution of the virtual user until
    * the stream ends.

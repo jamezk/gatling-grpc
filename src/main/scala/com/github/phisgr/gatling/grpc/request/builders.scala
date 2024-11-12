@@ -47,7 +47,7 @@ sealed abstract class ListeningStream[Status >: Completed, C <: StreamCall[_, _,
    *
    * @param waitFor Defaults to [[NoWait]]. Can wait for [[NextMessage]] or [[StreamEnd]] before combining.
    * @param sync    If true, the streaming state will also be updated.
-   * @return an [[ActionBuilder]]
+   * @return an [[io.gatling.core.action.builder.ActionBuilder]]
    */
   def reconciliate(waitFor: WaitType = NoWait, sync: Boolean = false): ActionBuilder =
     new StreamReconciliateBuilder(requestName, streamName, direction, waitFor, sync)
