@@ -232,7 +232,7 @@ case class DynamicGrpcProtocol(
    */
   lazy val disposeChannel: ActionBuilder = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action =
-      new DisposeDynamicChannel(channelAttributeName, next)
+      new DisposeDynamicChannel(channelAttributeName, next, ctx.coreComponents.statsEngine)
   }
 
   override def header[T](key: Metadata.Key[T], optional: Boolean = false)(value: Expression[T]): DynamicGrpcProtocol =

@@ -27,6 +27,7 @@ dependencies {
     add("com.github.phisgr:gatling-grpc:0.17.0")
     add("io.gatling:gatling-core-java:3.9.5")
     add("com.github.phisgr:gatling-kt-ext:0.5.0")
+    add("io.grpc:grpc-netty:1.68.1")
 
     gatlingImplementation(project(":scala-tests"))
     jmh(project(":scala-tests"))

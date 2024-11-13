@@ -16,7 +16,7 @@ import io.gatling.core.check.Check
 import io.gatling.core.session.{Expression, Session}
 import io.gatling.core.stats.StatsEngine
 import io.gatling.core.structure.ScenarioContext
-import io.gatling.jdk.util.StringBuilderPool
+import io.gatling.shared.util.StringBuilderPool
 import io.grpc._
 
 class GrpcCallAction[Req, Res](
@@ -63,8 +63,9 @@ class GrpcCallAction[Req, Res](
     } yield {
       val call = newCall(session, callOptions)
       if (throttler ne null) {
-        throttler.throttle(session.scenario, () =>
-          run(call, resolvedPayload, session, resolvedRequestName = name, headers)
+        throttler ! io.gatling.core.controller.throttle.Throttler.Command.ThrottledRequest(
+          session.scenario,
+          () => run(call, resolvedPayload, session, resolvedRequestName = name, headers)
         )
       } else {
         run(call, resolvedPayload, session, resolvedRequestName = name, headers)
@@ -73,11 +74,11 @@ class GrpcCallAction[Req, Res](
   }
 
   /**
-   * After the call ends, [[onClose]] will be called,
-   * then the execution will continue at [[run]] in the session event loop
+   * After the call ends, onClose will be called,
+   * then the execution will continue at run in the session event loop
    * and finally forward to the next action.
    *
-   * See [[io.grpc.stub.ClientCalls.UnaryStreamToFuture]]
+   * See UnaryStreamToFuture in io.grpc.stub.ClientCalls
    *
    * The headers object is read for logging after ClientCall.start. This is supposedly not safe.
    * We are accessing it after the call closed, so let's hope nothing bad happens.

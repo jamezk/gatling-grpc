@@ -8,8 +8,9 @@ val commonSettings = Seq(
   crossPaths := false,
 )
 
-val gatlingVersion = "3.9.5"
+val gatlingVersion = "3.12.0"
 val gatlingCore = "io.gatling" % "gatling-core" % gatlingVersion
+val grpcVersion = "1.68.1"
 
 val publishSettings = {
   import xerial.sbt.Sonatype.*
@@ -28,7 +29,7 @@ lazy val root = (project in file("."))
   .settings(publishSettings *)
   .settings(
     name := "gatling-grpc",
-    version := "0.17.0",
+    version := "0.19.0-SNAPSHOT",
     inConfig(Test)(sbtprotoc.ProtocPlugin.protobufConfigSettings),
     Test / PB.targets := Seq(
       scalapb.gen() -> (Test / sourceManaged).value,
@@ -42,11 +43,11 @@ lazy val root = (project in file("."))
       "-opt:l:method",
     ),
     libraryDependencies ++= Seq(
-      "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+      "io.grpc" % "grpc-netty" % grpcVersion,
       "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
       "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
       gatlingCore,
-      "com.github.phisgr" % "gatling-ext" % "0.5.0",
+      "com.github.phisgr" % "gatling-ext" % "0.6.0-SNAPSHOT",
       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % "test",
       "io.gatling" % "gatling-test-framework" % gatlingVersion % "test",
       "org.scalatest" %% "scalatest" % "3.2.12" % "test",

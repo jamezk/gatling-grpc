@@ -9,11 +9,30 @@ import io.gatling.core.action.builder.ActionBuilder
 import io.gatling.core.session.Expression
 import io.grpc.MethodDescriptor
 
+import java.io.{ByteArrayInputStream, InputStream}
 import scala.reflect.ClassTag
+import scala.util.Try
 
 case class Grpc private[gatling](requestName: Expression[String]) {
   def rpc[Req, Res](method: MethodDescriptor[Req, Res]): Unary[Req, Res] =
     new Unary(requestName, method)
+
+  /**
+   * Allows us to create a call from just the service and method name
+   * @param serviceName
+   * @param methodName
+   * @return
+   */
+  def rpcRaw(serviceName: String, methodName: String): UnaryRaw = {
+    val methodDescriptor = MethodDescriptor.newBuilder[Array[Byte], Array[Byte]]()
+                                           .setType(MethodDescriptor.MethodType.UNARY)
+                                           .setFullMethodName(s"$serviceName/$methodName")
+                                           .setRequestMarshaller(RawMessageMarshaller)
+                                           .setResponseMarshaller(RawMessageMarshaller)
+                                           .build
+
+    UnaryRaw(requestName, methodDescriptor)
+  }
 
   def serverStream[Req, Res](method: MethodDescriptor[Req, Res], streamName: Expression[String]): ServerStream[Req, Res] =
     ServerStream(requestName, method, streamName)
@@ -25,11 +44,36 @@ case class Grpc private[gatling](requestName: Expression[String]) {
     ClientStream(requestName, method, streamName)
 }
 
+
+object RawMessageMarshaller extends MethodDescriptor.Marshaller[Array[Byte]] {
+  def stream(value: Array[Byte]) = new ByteArrayInputStream(value)
+
+  def parse(stream: InputStream): Array[Byte] =
+    Try(stream.readAllBytes).getOrElse(throw new RuntimeException("Failed to read bytes"))
+}
+
 class Unary[Req, Res] private[gatling](requestName: Expression[String], method: MethodDescriptor[Req, Res]) {
   checkMethodDescriptor(method, expected = MethodDescriptor.MethodType.UNARY)
 
   def payload(req: Expression[Req]): GrpcCallActionBuilder[Req, Res] =
     GrpcCallActionBuilder(requestName, method, req)
+}
+
+
+case class UnaryRaw private[gatling](
+                                      requestName: Expression[String],
+                                      method: MethodDescriptor[Array[Byte], Array[Byte]]
+                                    ) {
+  checkMethodDescriptor(method, expected = MethodDescriptor.MethodType.UNARY)
+
+  def payload(req: Expression[Array[Byte]]): GrpcCallActionBuilder[Array[Byte], Array[Byte]] =
+    GrpcCallActionBuilder(requestName, method, req)
+
+  // Rename the method to make it distinct
+  def payloadFromProto[T <: com.google.protobuf.Message](message: Expression[T]): GrpcCallActionBuilder[Array[Byte], Array[Byte]] = {
+    val byteArrayExpr: Expression[Array[Byte]] = message.map(_.toByteArray)
+    payload(byteArrayExpr)
+  }
 }
 
 sealed abstract class ListeningStream[Status >: Completed, C <: StreamCall[_, _, Status] : ClassTag] private[gatling] {
@@ -42,12 +86,12 @@ sealed abstract class ListeningStream[Status >: Completed, C <: StreamCall[_, _,
   def cancelStream = new StreamCancelBuilder(requestName, streamName, direction)
 
   /**
-   * Combines the streaming state and the main flow.
+   * Combines the streaming state and the main flow using [[StreamStartBuilder.sessionCombiner]].
    * If the stream has already ended, the streaming call will be removed from the session.
    *
    * @param waitFor Defaults to [[NoWait]]. Can wait for [[NextMessage]] or [[StreamEnd]] before combining.
    * @param sync    If true, the streaming state will also be updated.
-   * @return an [[io.gatling.core.action.builder.ActionBuilder]]
+   * @return an [[ActionBuilder]]
    */
   def reconciliate(waitFor: WaitType = NoWait, sync: Boolean = false): ActionBuilder =
     new StreamReconciliateBuilder(requestName, streamName, direction, waitFor, sync)
@@ -61,10 +105,10 @@ sealed abstract class ListeningStream[Status >: Completed, C <: StreamCall[_, _,
 }
 
 case class ServerStream[Req, Res] private[gatling](
-  requestName: Expression[String],
-  method: MethodDescriptor[Req, Res],
-  streamName: Expression[String]
-) extends ListeningStream[ServerStreamState, ServerStreamCall[_, _]] {
+                                                    requestName: Expression[String],
+                                                    method: MethodDescriptor[Req, Res],
+                                                    streamName: Expression[String]
+                                                  ) extends ListeningStream[ServerStreamState, ServerStreamCall[_, _]] {
   checkMethodDescriptor(method, expected = MethodDescriptor.MethodType.SERVER_STREAMING)
 
   override def direction: String = "server"
@@ -75,10 +119,10 @@ case class ServerStream[Req, Res] private[gatling](
 }
 
 case class BidiStream[Req: ClassTag, Res] private[gatling](
-  requestName: Expression[String],
-  method: MethodDescriptor[Req, Res],
-  streamName: Expression[String]
-) extends ListeningStream[BidiStreamState, BidiStreamCall[_, _]] {
+                                                            requestName: Expression[String],
+                                                            method: MethodDescriptor[Req, Res],
+                                                            streamName: Expression[String]
+                                                          ) extends ListeningStream[BidiStreamState, BidiStreamCall[_, _]] {
   checkMethodDescriptor(method, expected = MethodDescriptor.MethodType.BIDI_STREAMING)
 
   override def direction: String = "bidi"
@@ -95,10 +139,10 @@ case class BidiStream[Req: ClassTag, Res] private[gatling](
 }
 
 case class ClientStream[Req: ClassTag, Res] private[gatling](
-  requestName: Expression[String],
-  method: MethodDescriptor[Req, Res],
-  streamName: Expression[String]
-) {
+                                                              requestName: Expression[String],
+                                                              method: MethodDescriptor[Req, Res],
+                                                              streamName: Expression[String]
+                                                            ) {
   checkMethodDescriptor(method, expected = MethodDescriptor.MethodType.CLIENT_STREAMING)
   private def clientStreamDirection: String = "client"
 

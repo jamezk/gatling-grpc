@@ -14,7 +14,7 @@ import io.gatling.core.action.Action
 import io.gatling.core.check.Check
 import io.gatling.core.session.Session
 import io.gatling.core.stats.StatsEngine
-import io.gatling.jdk.util.StringBuilderPool
+import io.gatling.shared.util.StringBuilderPool
 import io.grpc.MethodDescriptor.Marshaller
 import io.grpc.{ClientCall, Metadata, Status}
 import io.netty.channel.EventLoop

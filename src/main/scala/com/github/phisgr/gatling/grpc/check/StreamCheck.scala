@@ -1,10 +1,10 @@
 package com.github.phisgr.gatling.grpc.check
 
 import com.github.phisgr.gatling.grpc.check.GrpcCheck.Scope
-import com.softwaremill.quicklens._
 import io.gatling.commons.validation.Validation
 import io.gatling.core.check.{Check, CheckResult}
 import io.gatling.core.session.{Expression, Session}
+import io.gatling.internal.quicklens.ModifyPimp
 
 import java.util.{Map => JMap}
 import scala.annotation.unchecked.uncheckedVariance

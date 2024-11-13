@@ -5,6 +5,7 @@ import io.gatling.core.CoreComponents
 import io.gatling.core.action.builder.ActionBuilder
 import io.gatling.core.action.{Action, ChainableAction}
 import io.gatling.core.session.Session
+import io.gatling.core.stats.StatsEngine
 import io.gatling.core.structure.ScenarioContext
 import io.gatling.core.util.NameGen
 import io.grpc.{ManagedChannel, ManagedChannelBuilder}
@@ -23,6 +24,7 @@ class SetDynamicChannel(
   coreComponents: CoreComponents,
   override val next: Action
 ) extends ChainableAction with NameGen {
+  override val statsEngine: StatsEngine = coreComponents.statsEngine
   override val name: String = genName("setDynamicChannel")
   override protected def execute(session: Session): Unit = {
     val builder = createBuilder(session)
@@ -33,7 +35,8 @@ class SetDynamicChannel(
 
 class DisposeDynamicChannel(
   channelAttributeName: String,
-  override val next: Action
+  override val next: Action,
+  override val statsEngine: StatsEngine
 ) extends ChainableAction with NameGen {
   override val name: String = genName("closeDynamicChannel")
   override protected def execute(session: Session): Unit = {

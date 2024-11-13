@@ -7,7 +7,7 @@ import io.gatling.core.session.{Expression, Session}
 import scala.annotation.unchecked.uncheckedVariance
 
 /**
- * Make the return type of [[Check.checkIf]] to be the child class.
+ * Make the return type of checkIf to be the child class.
  *
  * @tparam T    the type of values being checked
  * @tparam Self the child class
